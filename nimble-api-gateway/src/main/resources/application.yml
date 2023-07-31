@@ -1,0 +1,20 @@
+server:
+  port: 8102
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: after_route
+          uri: https://yupi.icu
+          predicates:
+            - After=2017-01-20T17:42:47.789-07:00[America/Denver]
+#        - id: after_route
+#          uri: https://baidu.com
+#          predicates:
+#            - Before=2023-07-11T17:42:47.789-07:00[America/Denver]
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
