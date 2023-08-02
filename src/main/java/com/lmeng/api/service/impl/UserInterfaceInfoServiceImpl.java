@@ -13,20 +13,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 /**
-* @author 26816
-* @description 针对表【user_interface_info(用户调用接口关系)】的数据库操作Service实现
-* @createDate 2023-07-31 15:03:51
+* 用户调用接口信息
 */
 @Service
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
     implements UserInterfaceInfoService{
 
+    /**
+     * 校验接口参数信息
+     * @param userInterfaceInfo
+     * @param add
+     */
     @Override
     public void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add) {
         if (userInterfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 创建时，所有参数都不能为空
+        // 创建时，接口和用户必须存在
         if (add) {
             if(userInterfaceInfo.getInterfaceInfoId() <= 0 || userInterfaceInfo.getUserId() < 0) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口或用户不存在");
@@ -38,13 +41,19 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         }
     }
 
+    /**
+     * 用户调用接口计数
+     * @param interfaceId
+     * @param userId
+     * @return
+     */
     @Override
     public boolean invokeCount(long interfaceId, int userId) {
         //1.判断接口和用户是否存在
         if(interfaceId < 0 || userId < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        //TODO 分布式锁
+        //TODO 分布式锁(原子性的)
         //2.用户接口信息表 剩余接口次数-1，总调用次数+1
         UpdateWrapper<UserInterfaceInfo> wrapper = new UpdateWrapper<>();
         wrapper.eq("interfaceId",interfaceId);

@@ -21,8 +21,12 @@ import java.util.Map;
  */
 
 public class NimbleApiClient {
-    String accessKey;
-    String secretKey;
+
+    private static final String GATEWAY_HOST = "http://localhost:8103";
+
+    private String accessKey;
+
+    private String secretKey;
 
     public NimbleApiClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
@@ -45,7 +49,7 @@ public class NimbleApiClient {
         //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("name", name);
-        String result = HttpUtil.get("http://localhost:8102/api/name/", paramMap);
+        String result = HttpUtil.get(GATEWAY_HOST + "/api/name/", paramMap);
         return result;
     }
 
@@ -53,13 +57,13 @@ public class NimbleApiClient {
         //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
         HashMap<String, Object> paramMap = new HashMap<>();
         paramMap.put("name", name);
-        String result = HttpUtil.post("http://localhost:8102/api/name/", paramMap);
+        String result = HttpUtil.post(GATEWAY_HOST + "/api/name/", paramMap);
         return result;
     }
 
     public String getUserNameByPost(@RequestBody User user) {
         String jsonStr = JSONUtil.toJsonStr(user);
-        HttpResponse response = HttpRequest.post("http://localhost:8102/api/name/user")
+        HttpResponse response = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
                 .addHeaders(getHeaderMap(jsonStr))
                 .body(jsonStr)
                 .execute();

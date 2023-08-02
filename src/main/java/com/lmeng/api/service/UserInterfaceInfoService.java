@@ -19,7 +19,7 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
     void validUserInterfaceInfo(UserInterfaceInfo userInterfaceInfo, boolean add);
 
     /**
-     * 用户调用接口
+     * 用户调用接口计数
      * @param interfaceId
      * @param userId
      * @return

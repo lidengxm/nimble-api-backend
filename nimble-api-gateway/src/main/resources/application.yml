@@ -1,20 +1,34 @@
 server:
-  port: 8102
+  port: 8103
 spring:
   cloud:
     gateway:
       routes:
-        - id: after_route
-          uri: https://yupi.icu
+        - id: path_route
+          uri: http://localhost:8102
           predicates:
-            - After=2017-01-20T17:42:47.789-07:00[America/Denver]
+            - Path=/api/**
+      default-filters:
+        - AddRequestHeader=source, yupi
+
 #        - id: after_route
 #          uri: https://baidu.com
 #          predicates:
 #            - Before=2023-07-11T17:42:47.789-07:00[America/Denver]
+
+# 详细日志
 logging:
   level:
     org:
       springframework:
         cloud:
           gateway: trace
+# Dubbo配置和Nacos
+dubbo:
+  application:
+    name: nimble-api-backend
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: nacos://localhost:8848
