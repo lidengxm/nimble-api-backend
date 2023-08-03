@@ -21,6 +21,13 @@
     </properties>
 
     <dependencies>
+        <!--通用模块-->
+        <dependency>
+            <artifactId>nimble-api-common</artifactId>
+            <groupId>com.lmeng</groupId>
+            <version>0.0.1</version>
+        </dependency>
+
         <!--Nacos注册中心-->
         <dependency>
             <groupId>com.alibaba.nacos</groupId>

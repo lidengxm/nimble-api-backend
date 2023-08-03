@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.lmeng.api.mapper.UserInterfaceInfoMapper">
+<mapper namespace="com.lmeng.api.project.mapper.UserInterfaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.lmeng.api.model.entity.UserInterfaceInfo">
+    <resultMap id="BaseResultMap" type="com.lmeng.apicommon.model.entity.UserInterfaceInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>
             <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="BIGINT"/>
