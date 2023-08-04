@@ -29,7 +29,7 @@ public class Knife4jConfig {
                         .build())
                 .select()
                 // 指定 Controller 扫描包路径
-                .apis(RequestHandlerSelectors.basePackage("com.lmeng.api.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.lmeng.api.project.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }

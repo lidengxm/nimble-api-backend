@@ -20,19 +20,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class NimbleApiGatewayApplication {
 
-    @DubboReference
-    private DemoService demoService;
+//    @DubboReference
+//    private DemoService demoService;
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = SpringApplication.run(NimbleApiGatewayApplication.class, args);
-        NimbleApiGatewayApplication bean = context.getBean(NimbleApiGatewayApplication.class);
-        String name = bean.sayHello2("yupi");
-        System.out.println(name);
+        SpringApplication.run(NimbleApiGatewayApplication.class, args);
+//        NimbleApiGatewayApplication bean = context.getBean(NimbleApiGatewayApplication.class);
+//        String name = bean.sayHello2("yupi");
+//        System.out.println(name);
     }
 
-    public String sayHello2(String name) {
-        return demoService.sayHello(name);
-    }
+//    public String sayHello2(String name) {
+//        return demoService.sayHello(name);
+//    }
 
 
     @Bean

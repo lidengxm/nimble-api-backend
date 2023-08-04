@@ -21,4 +21,8 @@
         totalNum,leftNum,status,
         createTime,updateTime,isDelete
     </sql>
+    <select id="listTopInvokeInterfaceInfo" resultType="com.lmeng.apicommon.model.entity.UserInterfaceInfo">
+        select interfaceInfoId,sum(totalNum) as totalNum from user_interface_info
+        group by interfaceInfoId order by totalNum desc limit 3;
+    </select>
 </mapper>

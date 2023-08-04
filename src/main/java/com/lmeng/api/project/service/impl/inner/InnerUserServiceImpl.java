@@ -1,17 +1,13 @@
 package com.lmeng.api.project.service.impl.inner;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lmeng.api.project.common.ErrorCode;
-import com.lmeng.api.project.common.ResultUtils;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.mapper.UserMapper;
-import com.lmeng.api.project.service.UserService;
 import com.lmeng.apicommon.model.entity.User;
 import com.lmeng.apicommon.service.InnerUserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 

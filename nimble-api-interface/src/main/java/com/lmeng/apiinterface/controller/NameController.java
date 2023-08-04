@@ -30,25 +30,25 @@ public class NameController {
 
     @PostMapping("/user")
     public String getUserNameByPost(@RequestBody User user, HttpServletRequest request) {
-        String accessKey = request.getHeader("accessKey");
-        String nonce = request.getHeader("nonce");
-        String timestamp = request.getHeader("timestamp");
-        String sign = request.getHeader("sign");
-        String body = request.getHeader("body");
-        //根据实际情况应该是去数据库中查询是否分配该用户
-        if(!accessKey.equals(accessKey)) {
-            throw new RuntimeException("没有权限");
-        }
-        if(Long.parseLong(nonce) > 10000) {
-            throw new RuntimeException("无权限");
-        }
-        //todo 时间戳和当前时间不能超过5分钟
-
-        //实际情况中是从数据库中查询secretKey
-        String serverSign = SignUtil.getSign(body, "0729");
-        if(!sign.equals(serverSign)) {
-            throw new RuntimeException("没有权限");
-        }
+//        String accessKey = request.getHeader("accessKey");
+//        String nonce = request.getHeader("nonce");
+//        String timestamp = request.getHeader("timestamp");
+//        String sign = request.getHeader("sign");
+//        String body = request.getHeader("body");
+//        //根据实际情况应该是去数据库中查询是否分配该用户
+//        if(!accessKey.equals(accessKey)) {
+//            throw new RuntimeException("没有权限");
+//        }
+//        if(Long.parseLong(nonce) > 10000) {
+//            throw new RuntimeException("无权限");
+//        }
+//        //todo 时间戳和当前时间不能超过5分钟
+//
+//        //实际情况中是从数据库中查询secretKey
+//        String serverSign = SignUtil.getSign(body, "0729");
+//        if(!sign.equals(serverSign)) {
+//            throw new RuntimeException("没有权限");
+//        }
 
         return "POST 用户的名字是：" + user.getUserName();
     }

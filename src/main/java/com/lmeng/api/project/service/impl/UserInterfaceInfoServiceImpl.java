@@ -47,7 +47,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
     @Override
     public boolean invokeCount(long interfaceInfoId, long userId) {
         //1.判断接口和用户是否存在
-        if(interfaceInfoId < 0 || userId < 0) {
+        if(interfaceInfoId <= 0 || userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //TODO 分布式锁(原子性的)

@@ -24,18 +24,18 @@ public class InnerInterfaceInfoServiceImpl implements InnerInterfaceInfoService 
 
     /**
      * 查询接口是否存在
-     * @param path
+     * @param url
      * @param method
      * @return
      */
     @Override
-    public InterfaceInfo getInterfaceInfo(String path, String method) {
-        if(StringUtils.isAnyBlank(path,method)) {
+    public InterfaceInfo getInterfaceInfo(String url, String method) {
+        if(StringUtils.isAnyBlank(url,method)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         //2.构造查询条件
         QueryWrapper<InterfaceInfo> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("path",path);
+        queryWrapper.eq("url",url);
         queryWrapper.eq("method",method);
         return interfaceInfoMapper.selectOne(queryWrapper);
     }
