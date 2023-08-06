@@ -8,7 +8,7 @@ target/
 !**/src/test/**/target/
 
 #resoures
-src/main/resources/des.properties
+**/src/main/resources/des.properties
 
 ### STS ###
 .apt_generated
