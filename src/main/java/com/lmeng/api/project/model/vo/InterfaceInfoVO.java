@@ -21,5 +21,7 @@ public class InterfaceInfoVO implements Serializable {
      */
     private Integer totalNum;
 
+    private String name;
+
     private static final long serialVersionUID = 1L;
 }

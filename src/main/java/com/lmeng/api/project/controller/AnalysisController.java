@@ -43,6 +43,10 @@ public class AnalysisController {
     @Resource
     private InterfaceInfoService interfaceInfoService;
 
+    /**
+     * 统计接口调用次数前3
+     * @return
+     */
     @GetMapping("/top/interface/invoke")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<List<InterfaceInfoVO>> listTopInvokeInterface() {
@@ -68,6 +72,7 @@ public class AnalysisController {
             //从用户接口集合中查询出接口对应的调用次数
             Integer totalNum = interfaceInfoObjMap.get(interfaceInfo.getId()).get(0).getTotalNum();
             interfaceInfoVO.setTotalNum(totalNum);
+            interfaceInfoVO.setName(interfaceInfo.getName());
             return interfaceInfoVO;
         }).collect(Collectors.toList());
         //5.返回

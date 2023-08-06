@@ -67,8 +67,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 2. 加密
             String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
             //3.分配accessKey和secretKey
-            String accessKey = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil.randomNumbers(5)).getBytes());
-            String secretKey = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil.randomNumbers(8)).getBytes());
+            String accessKey = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil
+                    .randomNumbers(5)).getBytes());
+            String secretKey = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil
+                    .randomNumbers(8)).getBytes());
             // 4. 插入数据
             User user = new User();
             user.setUserAccount(userAccount);
@@ -241,5 +243,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+    /**
+     * 更新用户密钥
+     * @param id
+     * @return
+     */
+    @Override
+    public boolean updateSecretKey(Long id) {
+        if(id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = getById(id);
+        String userAccount = user.getUserAccount();
+        //重新生成密钥信息
+        String accessKey = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil.randomNumbers(5)).getBytes());
+        String secretKey = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil.randomNumbers(8)).getBytes());
+        user.setAccessKey(accessKey);
+        user.setSecretKey(secretKey);
+        //更新用户密钥
+        return this.updateById(user);
     }
 }

@@ -2,13 +2,10 @@ package com.lmeng.api.project.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lmeng.api.project.annotation.AuthCheck;
-import com.lmeng.api.project.common.BaseResponse;
-import com.lmeng.api.project.common.ErrorCode;
+import com.lmeng.api.project.common.*;
 import com.lmeng.api.project.constant.UserConstant;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
-import com.lmeng.api.project.common.DeleteRequest;
-import com.lmeng.api.project.common.ResultUtils;
 import com.lmeng.api.project.model.vo.LoginUserVO;
 import com.lmeng.api.project.model.vo.UserVO;
 import com.lmeng.api.project.service.UserService;
@@ -272,6 +269,23 @@ public class UserController {
         BeanUtils.copyProperties(userUpdateMyRequest, user);
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 更新用户密钥 secretKey
+     *
+     * @param idRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/update/secret_key")
+    public BaseResponse<Boolean> updateSecretKey(@RequestBody IdRequest idRequest, HttpServletRequest request) {
+        if (idRequest == null || idRequest.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        boolean result = userService.updateSecretKey(idRequest.getId());
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
