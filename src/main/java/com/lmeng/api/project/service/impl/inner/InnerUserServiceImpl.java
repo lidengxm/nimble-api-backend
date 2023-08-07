@@ -1,9 +1,9 @@
 package com.lmeng.api.project.service.impl.inner;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.lmeng.api.project.common.ErrorCode;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.mapper.UserMapper;
+import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.model.entity.User;
 import com.lmeng.apicommon.service.InnerUserService;
 import org.apache.commons.lang3.StringUtils;

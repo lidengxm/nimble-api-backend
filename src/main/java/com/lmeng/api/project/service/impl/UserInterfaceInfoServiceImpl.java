@@ -2,12 +2,18 @@ package com.lmeng.api.project.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.lmeng.api.project.common.ErrorCode;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.mapper.UserInterfaceInfoMapper;
 import com.lmeng.api.project.service.UserInterfaceInfoService;
+import com.lmeng.apicommon.common.ErrorCode;
+import com.lmeng.apicommon.constant.RedissonConstant;
 import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
 * 用户调用接口信息
@@ -15,6 +21,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoMapper, UserInterfaceInfo>
     implements UserInterfaceInfoService {
+
+    @Resource
+    private RedissonClient redissonClient;
 
     /**
      * 校验接口参数信息
@@ -50,17 +59,29 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         if(interfaceInfoId <= 0 || userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        //TODO 分布式锁(原子性的)
-        //2.用户接口信息表 剩余接口次数-1，总调用次数+1
+        //2.用户接口信息表 剩余接口次数-1，总调用次数+1，使用分布式锁改进
+        //2.1获取Redisson可重入锁
+        RLock lock = redissonClient.getLock(RedissonConstant.INVOKE_NAME + interfaceInfoId);
         UpdateWrapper<UserInterfaceInfo> wrapper = new UpdateWrapper<>();
-        wrapper.eq("interfaceInfoId",interfaceInfoId);
-        wrapper.eq("userId",userId);
-        //剩余调用次数大于0
-        wrapper.gt("leftNum",0);
-        wrapper.setSql("leftNum = leftNum - 1, totalNum = totalNum + 1");
-        return this.update(wrapper);
-    }
+        boolean result = false;
+        try {
+            //2.获取锁成功才查询接口次数，修改剩余调用次数
+            if(lock.tryLock(RedissonConstant.INVOKE_NAME_TIME, TimeUnit.MINUTES)) {
+                wrapper.eq("interfaceInfoId",interfaceInfoId);
+                wrapper.eq("userId",userId);
+                //剩余调用次数大于0
+                wrapper.gt("leftNum",0);
+                wrapper.setSql("leftNum = leftNum - 1, totalNum = totalNum + 1");
+                result = this.update(wrapper);
+            }
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+        return result;
+    }
 }
 
 

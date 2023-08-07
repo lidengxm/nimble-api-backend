@@ -7,8 +7,11 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-#resoures
-**/src/main/resources/des.properties
+# Ignore .properties files
+*.properties
+
+# Ignore specific properties file in a specific directory
+src/main/resources/des.properties
 
 ### STS ###
 .apt_generated

@@ -1,5 +1,4 @@
-package com.lmeng.api.project.exception;
-
+package com.lemng.apigateway.exception;
 
 import com.lmeng.apicommon.common.ErrorCode;
 

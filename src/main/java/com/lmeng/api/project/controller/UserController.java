@@ -2,25 +2,18 @@ package com.lmeng.api.project.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lmeng.api.project.annotation.AuthCheck;
-import com.lmeng.api.project.common.*;
-import com.lmeng.api.project.constant.UserConstant;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
-import com.lmeng.api.project.model.vo.LoginUserVO;
-import com.lmeng.api.project.model.vo.UserVO;
 import com.lmeng.api.project.service.UserService;
-import com.lmeng.api.project.model.dto.user.UserAddRequest;
-import com.lmeng.api.project.model.dto.user.UserLoginRequest;
-import com.lmeng.api.project.model.dto.user.UserQueryRequest;
-import com.lmeng.api.project.model.dto.user.UserRegisterRequest;
-import com.lmeng.api.project.model.dto.user.UserUpdateMyRequest;
-import com.lmeng.api.project.model.dto.user.UserUpdateRequest;
-
-import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.lmeng.apicommon.common.*;
+import com.lmeng.apicommon.constant.UserConstant;
+import com.lmeng.apicommon.model.dto.user.*;
 import com.lmeng.apicommon.model.entity.User;
+import com.lmeng.apicommon.model.vo.LoginUserVO;
+import com.lmeng.apicommon.model.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 用户接口

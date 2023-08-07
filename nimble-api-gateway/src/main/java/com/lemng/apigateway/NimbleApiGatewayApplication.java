@@ -16,21 +16,9 @@ import org.springframework.stereotype.Service;
 @EnableDubbo
 @Service
 public class NimbleApiGatewayApplication {
-
-//    @DubboReference
-//    private DemoService demoService;
-
     public static void main(String[] args) {
         SpringApplication.run(NimbleApiGatewayApplication.class, args);
-//        NimbleApiGatewayApplication bean = context.getBean(NimbleApiGatewayApplication.class);
-//        String name = bean.sayHello2("yupi");
-//        System.out.println(name);
     }
-
-//    public String sayHello2(String name) {
-//        return demoService.sayHello(name);
-//    }
-
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {

@@ -1,15 +1,15 @@
 package com.lmeng.api.project.aop;
 
 import com.lmeng.api.project.annotation.AuthCheck;
-import com.lmeng.api.project.common.ErrorCode;
 import com.lmeng.api.project.exception.BusinessException;
-import com.lmeng.api.project.model.enums.UserRoleEnum;
 import com.lmeng.api.project.service.UserService;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.model.entity.User;
+import com.lmeng.apicommon.model.enums.UserRoleEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

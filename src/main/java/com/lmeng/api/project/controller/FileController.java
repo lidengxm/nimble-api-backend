@@ -1,8 +1,8 @@
 package com.lmeng.api.project.controller;
 
-import com.lmeng.api.project.common.BaseResponse;
-import com.lmeng.api.project.common.ResultUtils;
 import com.lmeng.api.project.manager.OosManager;
+import com.lmeng.apicommon.common.BaseResponse;
+import com.lmeng.apicommon.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;

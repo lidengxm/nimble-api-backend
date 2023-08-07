@@ -17,10 +17,4 @@ public interface InnerInterfaceInfoService {
      */
     InterfaceInfo getInterfaceInfo(String url, String method);
 
-//    /**
-//     * 校验接口参数是否合法
-//     * @param interfaceInfo
-//     * @param add
-//     */
-//    void validInterfaceInfo(InterfaceInfo interfaceInfo, boolean add);
 }

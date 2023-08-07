@@ -1,6 +1,7 @@
 package com.lmeng.api.project.exception;
 
-import com.lmeng.api.project.common.ErrorCode;
+
+import com.lmeng.apicommon.common.ErrorCode;
 
 /**
  * 抛异常工具类
