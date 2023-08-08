@@ -16,12 +16,12 @@ class NimbleApiInterfaceApplicationTests {
 
     @Test
     void contextLoads() {
-        String res1 = nimbleApiClient.getNameByGet("yupiapi");
-        String res2 = nimbleApiClient.getNameByPost("yupi");
-        String res3 = nimbleApiClient.getUserNameByPost(new User("lihu"));
-        System.out.println(res1);
-        System.out.println(res2);
-        System.out.println(res3);
+//        String res1 = nimbleApiClient.getNameByGet("yupiapi");
+//        String res2 = nimbleApiClient.getNameByPost("yupi");
+//        String res3 = nimbleApiClient.getUserNameByPost(new User("lihu"));
+//        System.out.println(res1);
+//        System.out.println(res2);
+//        System.out.println(res3);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.lemng.apigateway.filter;
 
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.core.util.URLUtil;
 import com.lemng.apigateway.exception.BusinessException;
 import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.model.entity.InterfaceInfo;
@@ -65,7 +67,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
         //1.打印请求日志
         ServerHttpRequest request = exchange.getRequest();
-        String path = INTERFACE_HOST + request.getPath().value();
+        String path = request.getPath().value();
         String method = request.getMethod().toString();
         String sourceAddress = request.getLocalAddress().getHostString();
         log.info("请求唯一标识=" + request.getId());
@@ -88,7 +90,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String nonce = headers.getFirst("nonce");
         String timestamp = headers.getFirst("timestamp");
         String sign = headers.getFirst("sign");
-        String body = headers.getFirst("body");
+//        String body = headers.getFirst("body");
+        String body = URLUtil.decode(headers.getFirst("body"), CharsetUtil.CHARSET_UTF_8);
 
         if(StringUtils.isEmpty(nonce)
                 || StringUtils.isEmpty(timestamp)

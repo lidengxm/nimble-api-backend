@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.lmeng.api.project.annotation.AuthCheck;
+import com.lmeng.api.project.config.GatewayConfig;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
 import com.lmeng.api.project.service.UserService;
@@ -42,7 +43,7 @@ public class InterfaceInfoController {
     private UserService userService;
 
     @Resource
-    private NimbleApiClient nimbleApiClient;
+    private GatewayConfig gatewayConfig;
 
     private final static Gson GSON = new Gson();
 
@@ -197,21 +198,35 @@ public class InterfaceInfoController {
         if(interfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口不存在!");
         }
+
         //3.判断接口是否可以调用
-        com.lmeng.nimbleclientsdk.model.User user = new com.lmeng.nimbleclientsdk.model.User();
-        String userName = "api";
-        user.setUserName(userName);
-        String result = nimbleApiClient.getUserNameByPost(user);
-        if(StringUtils.isBlank(result)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口调用失败");
+        String method = interfaceInfo.getMethod();
+        String url = interfaceInfo.getUrl();
+        String requestParams = interfaceInfo.getRequestParams();
+        //获取sdk客户端
+        NimbleApiClient nimbleApiClient = interfaceInfoService.getNimbleApiClient(request);
+        //设置网关地址
+        nimbleApiClient.setGatewayHost(gatewayConfig.getHost());
+
+        //4.测试调用
+        String result = null;
+        try {
+            result = nimbleApiClient.invokeInterface(requestParams, url, method);
+            if(StringUtils.isBlank(result)) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口数据为空!");
+            }
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口验证错误!");
         }
-        //4.可以调用，修改数据库
+
+        //5.可以调用，修改数据库
         InterfaceInfo newInterfaceInfo = new InterfaceInfo();
         newInterfaceInfo.setId(id);
         newInterfaceInfo.setStatus(InterfaceStatusEnum.ONLINE.getValue());
         //仅本人或者管理员才可以修改
         boolean res = interfaceInfoService.updateById(newInterfaceInfo);
-        //5.返回
+
+        //6.返回
         return ResultUtils.success(res);
     }
 
@@ -234,15 +249,8 @@ public class InterfaceInfoController {
         if(interfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口不存在!");
         }
-        //3.判断接口是否可以调用
-        com.lmeng.nimbleclientsdk.model.User user = new com.lmeng.nimbleclientsdk.model.User();
-        String userName = "api";
-        user.setUserName(userName);
-        String result = nimbleApiClient.getUserNameByPost(user);
-        if(StringUtils.isBlank(result)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口调用失败");
-        }
-        //4.可以调用，修改数据库
+
+        //3.修改数据库
         InterfaceInfo newInterfaceInfo = new InterfaceInfo();
         newInterfaceInfo.setId(id);
         newInterfaceInfo.setStatus(InterfaceStatusEnum.OFFLINE.getValue());
@@ -265,7 +273,6 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long id = invokeRequest.getId();
-        String userRequestParams = invokeRequest.getUserRequestParams();
         //2.判断接口是否存在
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
         if(interfaceInfo == null) {
@@ -276,16 +283,29 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口已下线!");
         }
         //4.获取登录用户的签名
-        User loginUser = userService.getLoginUser(request);
-        String accessKey = loginUser.getAccessKey();
-        String secretKey = loginUser.getSecretKey();
-        NimbleApiClient userClient = new NimbleApiClient(accessKey,secretKey);
-        Gson gson = new Gson();
-        com.lmeng.nimbleclientsdk.model.User user = gson.fromJson(userRequestParams, com.lmeng.nimbleclientsdk.model.User.class);
-        //5.调用接口.
-        String userName = userClient.getUserNameByPost(user);
+        String url = interfaceInfo.getUrl();
+        String method = interfaceInfo.getMethod();
+        String requestParams = invokeRequest.getRequestParams();
+
+        //5.获取SDK客户端
+        NimbleApiClient nimbleApiClient = interfaceInfoService.getNimbleApiClient(request);
+
+        //6.设置网关地址
+        nimbleApiClient.setGatewayHost(gatewayConfig.getHost());
+
+        //7.调用接口
+        String result = null;
+        try {
+            //执行调用接口
+            result = nimbleApiClient.invokeInterface(requestParams, url, method);
+            if(StringUtils.isBlank(result)) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口数据为空!");
+            }
+        } catch (Exception e) {
+             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        }
         //6.返回
-        return ResultUtils.success(userName);
+        return ResultUtils.success(result);
     }
 
 

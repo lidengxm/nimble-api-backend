@@ -1,13 +1,13 @@
 package com.lmeng.nimbleclientsdk.client;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
-import com.lmeng.nimbleclientsdk.model.User;
 import com.lmeng.nimbleclientsdk.util.SignUtil;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
@@ -22,52 +22,41 @@ import java.util.Map;
 
 public class NimbleApiClient {
 
-    private static final String GATEWAY_HOST = "http://localhost:8103";
+    private static String GATEWAY_HOST = "http://localhost:8103";
 
     private String accessKey;
 
     private String secretKey;
+
+    public void setGatewayHost(String gatewayHost) {
+        GATEWAY_HOST = gatewayHost;
+    }
 
     public NimbleApiClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }
 
-    private Map<String,String> getHeaderMap(String body) {
+    private Map<String,String> getHeaderMap(String body,String method) {
         Map<String,String> map = new HashMap<>();
         map.put("accessKey",accessKey);
-        //一定不能再服务器中传输
-//        map.put("secretKey",secretKey);
         map.put("nonce", RandomUtil.randomNumbers(4));
-        map.put("body",body);
         map.put("timestamp",String.valueOf(System.currentTimeMillis() / 1000));
         map.put("sign", SignUtil.getSign(body,secretKey));
+        body = URLUtil.encode(body, CharsetUtil.CHARSET_UTF_8);
+        map.put("body",body);
+        map.put("method",method);
         return map;
     }
 
-    public String getNameByGet(String name) {
-        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.get(GATEWAY_HOST + "/api/name/", paramMap);
-        return result;
-    }
-
-    public String getNameByPost(@RequestParam String name) {
-        //可以单独传入http参数，这样参数会自动做URL编码，拼接在URL中
-        HashMap<String, Object> paramMap = new HashMap<>();
-        paramMap.put("name", name);
-        String result = HttpUtil.post(GATEWAY_HOST + "/api/name/", paramMap);
-        return result;
-    }
-
-    public String getUserNameByPost(@RequestBody User user) {
-        String jsonStr = JSONUtil.toJsonStr(user);
-        HttpResponse response = HttpRequest.post(GATEWAY_HOST + "/api/name/user")
-                .addHeaders(getHeaderMap(jsonStr))
-                .body(jsonStr)
+    public String invokeInterface(String params, String url, String method) {
+        HttpResponse response = HttpRequest.post(GATEWAY_HOST + url)
+//        HttpResponse response = HttpRequest.post(url)
+                .header("Accept-Charset", CharsetUtil.UTF_8)
+                .addHeaders(getHeaderMap(params,method))
+                .body(params)
                 .execute();
-        System.out.println(response.getStatus());
-        return response.body();
+        return JSONUtil.formatJsonStr(response.body());
     }
+
 }

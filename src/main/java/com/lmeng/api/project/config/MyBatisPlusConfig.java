@@ -7,12 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.baomidou.mybatisplus.annotation.DbType;
+import org.springframework.context.annotation.PropertySource;
 
 /**
  * MyBatis Plus 配置
  */
 @Configuration
 @MapperScan("com.lmeng.api.project.mapper")
+@PropertySource("classpath:des.properties")
 public class MyBatisPlusConfig {
 
     /**

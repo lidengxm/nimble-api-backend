@@ -2,10 +2,10 @@
 # 端口和路径配置
 server:
   port: 8102
-  servlet:
-    context-path: /api
-# 自定义API客户端SDK配置
-nimble-api:
-  client:
-    access-key: yupiapi
-    secret-key: 0729
+#  servlet:
+#    context-path: /api
+# 自定义API客户端SDK配置，测试使用
+#nimble-api:
+#  client:
+#    access-key: yupiapi
+#    secret-key: 0729

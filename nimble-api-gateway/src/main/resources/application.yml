@@ -7,7 +7,7 @@ spring:
         - id: path_route
           uri: http://localhost:8102
           predicates:
-            - Path=/api/**
+            - Path=/**
       default-filters:
         - AddRequestHeader=source, yupi
 

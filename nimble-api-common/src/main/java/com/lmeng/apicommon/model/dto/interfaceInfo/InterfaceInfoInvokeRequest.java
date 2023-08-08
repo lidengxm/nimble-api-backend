@@ -13,17 +13,26 @@ import java.io.Serializable;
 @Data
 public class InterfaceInfoInvokeRequest implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     /**
-     * id主键
+     * 主键
      */
     private Long id;
 
     /**
-     * 用户填的请求参数
+     * 请求方法
      */
-    private String userRequestParams;
+    private String method;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    /**
+     * 请求参数
+     */
+    private String requestParams;
+
+    /**
+     * 主机号
+     */
+    private String host;
 
 }
