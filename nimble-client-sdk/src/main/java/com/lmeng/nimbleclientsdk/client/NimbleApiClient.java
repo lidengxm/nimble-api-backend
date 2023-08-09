@@ -1,14 +1,8 @@
 package com.lmeng.nimbleclientsdk.client;
 
-import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.URLUtil;
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSONUtil;
-import com.lmeng.nimbleclientsdk.util.SignUtil;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.lmeng.nimbleclientsdk.util.SignUtils;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,41 +16,32 @@ import java.util.Map;
 
 public class NimbleApiClient {
 
-    private static String GATEWAY_HOST = "http://localhost:8103";
+    protected static final String GATEWAY_HOST = "http://localhost:8103";
 
-    private String accessKey;
+    protected String accessKey;
 
-    private String secretKey;
-
-    public void setGatewayHost(String gatewayHost) {
-        GATEWAY_HOST = gatewayHost;
-    }
+    protected String secretKey;
 
     public NimbleApiClient(String accessKey, String secretKey) {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
     }
 
-    private Map<String,String> getHeaderMap(String body,String method) {
-        Map<String,String> map = new HashMap<>();
-        map.put("accessKey",accessKey);
-        map.put("nonce", RandomUtil.randomNumbers(4));
-        map.put("timestamp",String.valueOf(System.currentTimeMillis() / 1000));
-        map.put("sign", SignUtil.getSign(body,secretKey));
-        body = URLUtil.encode(body, CharsetUtil.CHARSET_UTF_8);
-        map.put("body",body);
-        map.put("method",method);
-        return map;
+    /**
+     * 负责将数字签名的相关参数填入请求头中
+     * @param body
+     * @param accessKey
+     * @param secretKey
+     * @return
+     */
+    protected static Map<String,String> getHeadMap(String body, String accessKey, String secretKey){
+        Map<String,String> headMap = new HashMap<>();
+        headMap.put("accessKey",accessKey);
+        headMap.put("body",body);
+        headMap.put("sign", SignUtils.generateSign(body,secretKey));
+        headMap.put("nonce", RandomUtil.randomNumbers(4));
+        //当下时间/1000，时间戳大概10位
+        headMap.put("timestamp",String.valueOf(System.currentTimeMillis()/1000));
+        return headMap;
     }
-
-    public String invokeInterface(String params, String url, String method) {
-        HttpResponse response = HttpRequest.post(GATEWAY_HOST + url)
-//        HttpResponse response = HttpRequest.post(url)
-                .header("Accept-Charset", CharsetUtil.UTF_8)
-                .addHeaders(getHeaderMap(params,method))
-                .body(params)
-                .execute();
-        return JSONUtil.formatJsonStr(response.body());
-    }
-
 }

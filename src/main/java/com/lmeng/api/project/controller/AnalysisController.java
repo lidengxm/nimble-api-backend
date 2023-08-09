@@ -43,14 +43,14 @@ public class AnalysisController {
     private InterfaceInfoService interfaceInfoService;
 
     /**
-     * 统计接口调用次数前3
+     * 统计接口调用次数
      * @return
      */
     @GetMapping("/top/interface/invoke")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<List<InterfaceInfoVO>> listTopInvokeInterface() {
-        //1.查询出接口调用次数前三的接口id
-        List<UserInterfaceInfo> userInterfaceInfos = userInterfaceInfoMapper.listTopInvokeInterfaceInfo(3);
+        //1.查询出接口调用次数id集合
+        List<UserInterfaceInfo> userInterfaceInfos = userInterfaceInfoMapper.listTopInvokeInterfaceInfo();
         //2.将用户接口对象按照接口ID排序
         Map<Long, List<UserInterfaceInfo>> interfaceInfoObjMap = userInterfaceInfos.stream().
                 collect(Collectors.groupingBy(UserInterfaceInfo::getInterfaceInfoId));

@@ -2,14 +2,22 @@ server:
   port: 8103
 spring:
   cloud:
-    gateway:
-      routes:
-        - id: path_route
-          uri: http://localhost:8102
-          predicates:
-            - Path=/**
-      default-filters:
-        - AddRequestHeader=source, yupi
+      gateway:
+        routes:
+          - id: path_route
+            uri: http://localhost:8102
+            predicates:
+              - Path=/api/**
+        default-filters:
+          - AddRequestHeader=source, yupi
+
+#    gateway:
+#      routes:
+#        - id: api_backend_route
+#          uri: lb://api-backend
+#          predicates:
+#            - Path=/api/**
+
 
 #        - id: after_route
 #          uri: https://baidu.com

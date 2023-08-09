@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.lmeng.api.project.annotation.AuthCheck;
-import com.lmeng.api.project.config.GatewayConfig;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
+import com.lmeng.api.project.service.UserInterfaceInfoService;
 import com.lmeng.api.project.service.UserService;
 import com.lmeng.api.project.service.InterfaceInfoService;
 import com.lmeng.apicommon.common.*;
@@ -18,8 +18,8 @@ import com.lmeng.apicommon.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
 import com.lmeng.apicommon.model.dto.interfaceInfo.InterfaceInfoUpdateRequest;
 import com.lmeng.apicommon.model.entity.InterfaceInfo;
 import com.lmeng.apicommon.model.entity.User;
+import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
 import com.lmeng.apicommon.model.enums.InterfaceStatusEnum;
-import com.lmeng.nimbleclientsdk.client.NimbleApiClient;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * 请求接口
@@ -37,17 +39,13 @@ import javax.servlet.http.HttpServletRequest;
 public class InterfaceInfoController {
 
     @Resource
+    private UserInterfaceInfoService userInterfaceInfoService;
+
+    @Resource
     private InterfaceInfoService interfaceInfoService;
 
     @Resource
     private UserService userService;
-
-    @Resource
-    private GatewayConfig gatewayConfig;
-
-    private final static Gson GSON = new Gson();
-
-    // region 增删改查
 
     /**
      * 创建
@@ -133,16 +131,25 @@ public class InterfaceInfoController {
 
     /**
      * 根据 id 获取接口信息
-     *
      * @param id
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id) {
+    public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id,HttpServletRequest request) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        //获取接口信息
         InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        //获取登录用户信息
+        User loginUser = userService.getLoginUser(request);
+        //分配接口调用次数给用户
+        UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+        userInterfaceInfo.setUserId(loginUser.getId());
+        userInterfaceInfo.setInterfaceInfoId(interfaceInfo.getId());
+        //给用户初始化调用次数20次
+        userInterfaceInfo.setLeftNum(CommonConstant.INITIAL_INVOKE_COUNT);
+        userInterfaceInfoService.save(userInterfaceInfo);
         return ResultUtils.success(interfaceInfo);
     }
 
@@ -199,35 +206,24 @@ public class InterfaceInfoController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口不存在!");
         }
 
-        //3.判断接口是否可以调用
-        String method = interfaceInfo.getMethod();
-        String url = interfaceInfo.getUrl();
-        String requestParams = interfaceInfo.getRequestParams();
-        //获取sdk客户端
-        NimbleApiClient nimbleApiClient = interfaceInfoService.getNimbleApiClient(request);
-        //设置网关地址
-        nimbleApiClient.setGatewayHost(gatewayConfig.getHost());
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
 
-        //4.测试调用
-        String result = null;
-        try {
-            result = nimbleApiClient.invokeInterface(requestParams, url, method);
-            if(StringUtils.isBlank(result)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口数据为空!");
-            }
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口验证错误!");
+        Object res = invokeInterfaceInfo(interfaceInfo.getSdk(), interfaceInfo.getName(), interfaceInfo.getRequestParams(), accessKey, secretKey);
+        if (res == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (res.toString().contains("Error request")) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统接口内部异常");
         }
 
-        //5.可以调用，修改数据库
-        InterfaceInfo newInterfaceInfo = new InterfaceInfo();
-        newInterfaceInfo.setId(id);
-        newInterfaceInfo.setStatus(InterfaceStatusEnum.ONLINE.getValue());
+        InterfaceInfo updateInterfaceInfo = new InterfaceInfo();
+        updateInterfaceInfo.setId(id);
+        updateInterfaceInfo.setStatus(InterfaceStatusEnum.ONLINE.getValue());
         //仅本人或者管理员才可以修改
-        boolean res = interfaceInfoService.updateById(newInterfaceInfo);
-
-        //6.返回
-        return ResultUtils.success(res);
+        boolean result = interfaceInfoService.updateById(updateInterfaceInfo);
+        return ResultUtils.success(result);
     }
 
     /**
@@ -262,19 +258,18 @@ public class InterfaceInfoController {
 
     /**
      * 调用接口
-     *
-     * @param invokeRequest
+     * @param interfaceInfoInvokeRequest
      * @return
      */
     @PostMapping("/invoke")
-    public BaseResponse<String> invokeInterfaceInfoById(@RequestBody InterfaceInfoInvokeRequest invokeRequest, HttpServletRequest request) {
+    public BaseResponse<Object> invokeInterfaceInfoById(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest, HttpServletRequest request) {
         //1.判断接口是否存在
-        if(invokeRequest == null || invokeRequest.getId() <= 0) {
+        if(interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        long id = invokeRequest.getId();
+        long interfaceInfoId = interfaceInfoInvokeRequest.getId();
         //2.判断接口是否存在
-        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(interfaceInfoId);
         if(interfaceInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"接口不存在!");
         }
@@ -282,30 +277,78 @@ public class InterfaceInfoController {
         if(interfaceInfo.getStatus() == InterfaceStatusEnum.OFFLINE.getValue()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口已下线!");
         }
-        //4.获取登录用户的签名
-        String url = interfaceInfo.getUrl();
-        String method = interfaceInfo.getMethod();
-        String requestParams = invokeRequest.getRequestParams();
 
-        //5.获取SDK客户端
-        NimbleApiClient nimbleApiClient = interfaceInfoService.getNimbleApiClient(request);
-
-        //6.设置网关地址
-        nimbleApiClient.setGatewayHost(gatewayConfig.getHost());
-
-        //7.调用接口
-        String result = null;
-        try {
-            //执行调用接口
-            result = nimbleApiClient.invokeInterface(requestParams, url, method);
-            if(StringUtils.isBlank(result)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"接口数据为空!");
-            }
-        } catch (Exception e) {
-             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "接口验证失败");
+        //4.校验用户对该接口的调用次数是否>0
+        User loginUser = userService.getLoginUser(request);
+        Long userId = loginUser.getId();
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("interfaceInfoId",interfaceInfoId);
+        queryWrapper.eq("userId",userId);
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.getOne(queryWrapper);
+        if(userInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"接口不存在!");
         }
-        //6.返回
-        return ResultUtils.success(result);
+        Integer leftNum = userInterfaceInfo.getLeftNum();
+        if(leftNum <= 0) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"无可用接口调用次数!");
+        }
+
+        //5.获取登录用户密钥
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        String requestParams= interfaceInfoInvokeRequest.getUserRequestParams();
+        //6.调用对应客户端SDK
+        Object res = invokeInterfaceInfo(interfaceInfo.getSdk(), interfaceInfo.getName(), requestParams, accessKey, secretKey);
+        if (res == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (res.toString().contains("Error request")) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "调用错误，请检查参数和接口调用次数！");
+        }
+        return ResultUtils.success(res);
+    }
+
+    /**
+     * 通过反射机制调用指定类的指定方法
+     * @param classPath  类路径
+     * @param methodName  方法名
+     * @param userRequestParams  请求参数
+     * @param accessKey  用户密钥
+     * @param secretKey  密钥密码
+     * @return
+     */
+    private Object invokeInterfaceInfo(String classPath, String methodName, String userRequestParams,
+                                       String accessKey, String secretKey) {
+        try {
+            //根据提供的类路径加载对应的类。
+            Class<?> clientClazz = Class.forName(classPath);
+            // 1. 获取构造器，参数为ak,sk
+            Constructor<?> binApiClientConstructor = clientClazz.getConstructor(String.class, String.class);
+            // 2. 构造出对应的客户端，并传入密钥
+            Object apiClient =  binApiClientConstructor.newInstance(accessKey, secretKey);
+
+            // 3. 找到要调用的方法
+            Method[] methods = clientClazz.getMethods();
+            for (Method method : methods) {
+                if (method.getName().equals(methodName)) {
+                    // 3.1 获取参数类型列表
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (parameterTypes.length == 0) {
+                        // 如果没有参数，直接调用
+                        return method.invoke(apiClient);
+                    }
+                    //如果有参数，将JSON 字符串转换为相应的参数类型对象
+                    Gson gson = new Gson();
+                    Object parameter = gson.fromJson(userRequestParams, parameterTypes[0]);
+                    //将参数对象传递给该方法，调用
+                    return method.invoke(apiClient, parameter);
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "调用方法出错！");
+        }
     }
 
 

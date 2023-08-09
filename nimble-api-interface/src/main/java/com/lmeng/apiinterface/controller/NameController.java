@@ -1,10 +1,7 @@
 package com.lmeng.apiinterface.controller;
 
 import com.lmeng.nimbleclientsdk.model.User;
-import com.lmeng.nimbleclientsdk.util.SignUtil;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @version 1.0
@@ -21,8 +18,8 @@ public class NameController {
      * @param user
      * @return
      */
-    @PostMapping("/api/name/user")
-    public String getUserNameByPost(@RequestBody User user) {
-        return "你的名字是：" + user.getUserName();
+    @PostMapping("/name/user")
+    public String getName(@RequestBody User user) {
+        return "你的名字是：" + user.getName();
     }
 }

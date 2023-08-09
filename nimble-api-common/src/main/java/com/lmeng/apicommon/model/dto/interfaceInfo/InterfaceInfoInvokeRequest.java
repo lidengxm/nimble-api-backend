@@ -16,23 +16,14 @@ public class InterfaceInfoInvokeRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
+     * 调用接口id
      */
     private Long id;
 
-    /**
-     * 请求方法
-     */
-    private String method;
 
     /**
-     * 请求参数
+     * 用户请求参数
      */
-    private String requestParams;
-
-    /**
-     * 主机号
-     */
-    private String host;
+    private String userRequestParams;
 
 }

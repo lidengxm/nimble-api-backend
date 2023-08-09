@@ -2,8 +2,13 @@
 # 端口和路径配置
 server:
   port: 8102
-#  servlet:
-#    context-path: /api
+  servlet:
+    context-path: /api/interface
+
+spring:
+  application:
+    name: api-interface
+
 # 自定义API客户端SDK配置，测试使用
 #nimble-api:
 #  client:

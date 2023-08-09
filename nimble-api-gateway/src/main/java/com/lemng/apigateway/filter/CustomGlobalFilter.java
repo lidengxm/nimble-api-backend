@@ -1,7 +1,5 @@
 package com.lemng.apigateway.filter;
 
-import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.URLUtil;
 import com.lemng.apigateway.exception.BusinessException;
 import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.model.entity.InterfaceInfo;
@@ -9,13 +7,11 @@ import com.lmeng.apicommon.model.entity.User;
 import com.lmeng.apicommon.service.InnerInterfaceInfoService;
 import com.lmeng.apicommon.service.InnerUserInterfaceInfoService;
 import com.lmeng.apicommon.service.InnerUserService;
-import com.lmeng.nimbleclientsdk.util.SignUtil;
-import javassist.runtime.Inner;
+import com.lmeng.nimbleclientsdk.util.SignUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
-import org.springframework.boot.convert.PeriodUnit;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -23,7 +19,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -35,7 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,7 +44,7 @@ import java.util.List;
 @Component
 public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
-    private static final List<String> IP_WHITE_LIST = Arrays.asList("127.0.0.1");
+    private static final List<String> IP_WHITE_LIST = Collections.singletonList("127.0.0.1");
 
     private static final String INTERFACE_HOST = "http://localhost:8103";
 
@@ -90,13 +85,13 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String nonce = headers.getFirst("nonce");
         String timestamp = headers.getFirst("timestamp");
         String sign = headers.getFirst("sign");
-//        String body = headers.getFirst("body");
-        String body = URLUtil.decode(headers.getFirst("body"), CharsetUtil.CHARSET_UTF_8);
+        String body = headers.getFirst("body");
+//        String body = URLUtil.decode(headers.getFirst("body"), CharsetUtil.CHARSET_UTF_8);
 
         if(StringUtils.isEmpty(nonce)
                 || StringUtils.isEmpty(timestamp)
-                || StringUtils.isEmpty(sign)
-                || StringUtils.isEmpty(body)) {
+                || StringUtils.isEmpty(sign)) {
+//                || StringUtils.isEmpty(body)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求头参数不完整!");
         }
 
@@ -113,7 +108,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
         //如果随机数超过10000报错
         if(Long.parseLong(nonce) > 10000L) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"随机数位数不对!");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求错误!");
         }
 
         //时间戳和当前时间不能超过5分钟 30 0000毫秒
@@ -125,7 +120,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
         //从数据库中查询secretKey并判断是否和用户传的加密的sk相等
         String secretKey = user.getSecretKey();
-        String serverSign = SignUtil.getSign(body, secretKey);
+//        String serverSign = SignUtil.getSign(body, secretKey);
+        String serverSign = SignUtils.generateSign(body, secretKey);
         if(sign == null || !sign.equals(serverSign)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"签名错误!");
         }
