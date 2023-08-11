@@ -1,25 +1,25 @@
 package com.lmeng.api.project.controller;
 
+import com.alibaba.nacos.api.naming.pojo.healthcheck.impl.Http;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
-import com.lmeng.api.project.annotation.AuthCheck;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
+import com.lmeng.api.project.model.vo.InterfaceInfoVO;
 import com.lmeng.api.project.service.UserInterfaceInfoService;
 import com.lmeng.api.project.service.UserService;
 import com.lmeng.api.project.service.InterfaceInfoService;
 import com.lmeng.apicommon.common.*;
+import com.lmeng.api.project.model.dto.interfaceInfo.InterfaceInfoAddRequest;
+import com.lmeng.api.project.model.dto.interfaceInfo.InterfaceInfoInvokeRequest;
+import com.lmeng.api.project.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
+import com.lmeng.api.project.model.dto.interfaceInfo.InterfaceInfoUpdateRequest;
+import com.lmeng.api.project.model.enums.InterfaceStatusEnum;
 import com.lmeng.apicommon.constant.CommonConstant;
-import com.lmeng.apicommon.constant.UserConstant;
-import com.lmeng.apicommon.model.dto.interfaceInfo.InterfaceInfoAddRequest;
-import com.lmeng.apicommon.model.dto.interfaceInfo.InterfaceInfoInvokeRequest;
-import com.lmeng.apicommon.model.dto.interfaceInfo.InterfaceInfoQueryRequest;
-import com.lmeng.apicommon.model.dto.interfaceInfo.InterfaceInfoUpdateRequest;
-import com.lmeng.apicommon.model.entity.InterfaceInfo;
-import com.lmeng.apicommon.model.entity.User;
-import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
-import com.lmeng.apicommon.model.enums.InterfaceStatusEnum;
+import com.lmeng.apicommon.entity.InterfaceInfo;
+import com.lmeng.apicommon.entity.User;
+import com.lmeng.apicommon.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -109,7 +109,6 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateInterfaceInfo(@RequestBody InterfaceInfoUpdateRequest interfaceInfoUpdateRequest) {
         if (interfaceInfoUpdateRequest == null || interfaceInfoUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -135,22 +134,30 @@ public class InterfaceInfoController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<InterfaceInfo> getInterfaceInfoById(long id,HttpServletRequest request) {
+    public BaseResponse<InterfaceInfoVO> getInterfaceInfoById(long id, HttpServletRequest request) {
+        //校验信息
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        //获取接口信息
-        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
-        //获取登录用户信息
         User loginUser = userService.getLoginUser(request);
-        //分配接口调用次数给用户
-        UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
-        userInterfaceInfo.setUserId(loginUser.getId());
-        userInterfaceInfo.setInterfaceInfoId(interfaceInfo.getId());
-        //给用户初始化调用次数20次
-        userInterfaceInfo.setLeftNum(CommonConstant.INITIAL_INVOKE_COUNT);
-        userInterfaceInfoService.save(userInterfaceInfo);
-        return ResultUtils.success(interfaceInfo);
+        Long userId = loginUser.getId();
+        if(userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        //1.获取接口信息
+        InterfaceInfo interfaceInfo = interfaceInfoService.getById(id);
+        //2.将接口信息复制到接口对象
+        InterfaceInfoVO interfaceInfoVO = new InterfaceInfoVO();
+        BeanUtils.copyProperties(interfaceInfo,interfaceInfoVO);
+        //3.查询到剩余接口调用次数信息并设置到接口视图对象
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("interfaceInfoId",id);
+        queryWrapper.eq("userId",userId);
+        UserInterfaceInfo userInterfaceInfo = userInterfaceInfoService.getOne(queryWrapper);
+        if(userInterfaceInfo != null) {
+            interfaceInfoVO.setAvailablePieces(userInterfaceInfo.getLeftNum().toString());
+        }
+        return ResultUtils.success(interfaceInfoVO);
     }
 
     /**
@@ -193,7 +200,6 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/online")
-    @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> onlineInterfaceInfoById(@RequestBody IdRequest idRequest, HttpServletRequest request) {
         //1.判断接口是否存在
         if(idRequest == null || idRequest.getId() <= 0) {
@@ -233,7 +239,6 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/offline")
-    @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> offlineInterfaceInfoById(@RequestBody IdRequest idRequest,HttpServletRequest request) {
         //1.判断接口是否存在
         if(idRequest == null || idRequest.getId() <= 0) {

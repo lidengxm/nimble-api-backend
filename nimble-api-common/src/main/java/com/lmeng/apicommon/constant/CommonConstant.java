@@ -18,6 +18,11 @@ public interface CommonConstant {
     /**
      * 用户初始分配接口调用次数
      */
-    Integer INITIAL_INVOKE_COUNT = 20;
+    Integer GET_INVOKE_COUNT = 10;
+
+    /**
+     * 用户名前缀
+     */
+    String USER_PREINDEX = "API";
 
 }

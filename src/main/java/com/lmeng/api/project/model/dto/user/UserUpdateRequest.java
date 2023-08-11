@@ -1,14 +1,18 @@
-package com.lmeng.apicommon.model.dto.user;
+package com.lmeng.api.project.model.dto.user;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 用户更新个人信息请求
+ * 用户更新请求
  */
 @Data
-public class UserUpdateMyRequest implements Serializable {
+public class UserUpdateRequest implements Serializable {
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 用户昵称
@@ -24,6 +28,11 @@ public class UserUpdateMyRequest implements Serializable {
      * 简介
      */
     private String userProfile;
+
+    /**
+     * 用户角色：user/admin/ban
+     */
+    private String userRole;
 
     private static final long serialVersionUID = 1L;
 }

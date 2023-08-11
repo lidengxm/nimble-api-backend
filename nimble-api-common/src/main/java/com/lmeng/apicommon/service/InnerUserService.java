@@ -1,7 +1,6 @@
 package com.lmeng.apicommon.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.lmeng.apicommon.model.entity.User;
+import com.lmeng.apicommon.entity.User;
 
 /**
  * 网关层使用的用户服务层

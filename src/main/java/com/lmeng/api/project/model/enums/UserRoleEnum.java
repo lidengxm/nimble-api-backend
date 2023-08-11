@@ -1,4 +1,4 @@
-package com.lmeng.apicommon.model.enums;
+package com.lmeng.api.project.model.enums;
 
 import org.apache.commons.lang3.ObjectUtils;
 

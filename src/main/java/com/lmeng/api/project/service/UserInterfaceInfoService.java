@@ -1,7 +1,9 @@
 package com.lmeng.api.project.service;
 
+
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
+import com.lmeng.api.project.model.dto.userInterfaceInfo.UserInterfaceInfoInvokeRequest;
+import com.lmeng.apicommon.entity.UserInterfaceInfo;
 
 public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
 
@@ -20,4 +22,10 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
      */
     boolean invokeCount(long interfaceInfoId, long userId);
 
+    /**
+     * 更新用户接口信息
+     * @param invokeRequest
+     * @return
+     */
+    boolean updateUserInterfaceInfo(UserInterfaceInfoInvokeRequest invokeRequest);
 }

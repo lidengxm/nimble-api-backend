@@ -1,15 +1,24 @@
-package com.lmeng.apicommon.model.dto.interfaceInfo;
+package com.lmeng.api.project.model.dto.interfaceInfo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.lmeng.apicommon.common.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
 /**
- * 增加调用接口
+ * 查询接口请求
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class InterfaceInfoAddRequest implements Serializable {
+public class InterfaceInfoQueryRequest extends PageRequest implements Serializable {
+
+    /**
+     * id主键
+     */
+    private Long id;
 
     /**
      * 名称
@@ -42,9 +51,25 @@ public class InterfaceInfoAddRequest implements Serializable {
     private String requestParams;
 
     /**
+     * 接口状态（0-关闭，1-开启）
+     */
+    private Integer status;
+
+    /**
      * 请求类型
      */
     private String method;
+
+    /**
+     * 创建人
+     */
+    private Long userId;
+
+    /**
+     * 是否删除(0-未删, 1-已删)
+     */
+    @TableLogic
+    private Integer isDelete;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

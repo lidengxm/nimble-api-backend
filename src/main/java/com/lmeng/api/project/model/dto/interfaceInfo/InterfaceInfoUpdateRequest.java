@@ -1,22 +1,20 @@
-package com.lmeng.apicommon.model.entity;
+package com.lmeng.api.project.model.dto.interfaceInfo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * 接口参数
- * @TableName interface_info
+ * 更新接口请求
  */
-@TableName(value ="interface_info")
 @Data
-public class InterfaceInfo implements Serializable {
+public class InterfaceInfoUpdateRequest implements Serializable {
+
     /**
      * id主键
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -46,17 +44,11 @@ public class InterfaceInfo implements Serializable {
 
     /**
      * 请求参数
-     * 示例：
      * [
      *     {"name": "username", "type": "string"}
      * ]
      */
     private String requestParams;
-
-    /**
-     * 接口对应的sdk
-     */
-    private String sdk;
 
     /**
      * 接口状态（0-关闭，1-开启）
@@ -67,21 +59,6 @@ public class InterfaceInfo implements Serializable {
      * 请求类型
      */
     private String method;
-
-    /**
-     * 创建人
-     */
-    private Long userId;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     /**
      * 是否删除(0-未删, 1-已删)

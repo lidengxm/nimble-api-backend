@@ -8,8 +8,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.lmeng.apicommon.common.ErrorCode;
-import com.lmeng.apicommon.model.entity.User;
-import com.lmeng.apicommon.model.enums.UserRoleEnum;
+import com.lmeng.apicommon.entity.User;
+import com.lmeng.api.project.model.enums.UserRoleEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

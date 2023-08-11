@@ -2,10 +2,10 @@ package com.lmeng.api.project.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.lmeng.apicommon.model.dto.user.UserQueryRequest;
-import com.lmeng.apicommon.model.entity.User;
-import com.lmeng.apicommon.model.vo.LoginUserVO;
-import com.lmeng.apicommon.model.vo.UserVO;
+import com.lmeng.api.project.model.dto.user.UserQueryRequest;
+import com.lmeng.apicommon.entity.User;
+import com.lmeng.api.project.model.vo.LoginUserVO;
+import com.lmeng.api.project.model.vo.UserVO;
 
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;

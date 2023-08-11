@@ -1,19 +1,19 @@
-package com.lmeng.apicommon.model.dto.user;
+package com.lmeng.api.project.model.dto.user;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 用户注册请求体
+ * 用户登录请求
  */
 @Data
-public class UserRegisterRequest implements Serializable {
+public class UserLoginRequest implements Serializable {
 
     private static final long serialVersionUID = 3191241716373120793L;
 
     /**
-     * 账号
+     * 用户名
      */
     private String userAccount;
 
@@ -21,9 +21,4 @@ public class UserRegisterRequest implements Serializable {
      * 密码
      */
     private String userPassword;
-
-    /**
-     * 确认密码
-     */
-    private String checkPassword;
 }

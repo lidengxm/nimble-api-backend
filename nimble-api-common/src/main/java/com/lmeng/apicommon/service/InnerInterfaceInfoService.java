@@ -1,8 +1,7 @@
 package com.lmeng.apicommon.service;
 
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.lmeng.apicommon.model.entity.InterfaceInfo;
+import com.lmeng.apicommon.entity.InterfaceInfo;
 
 /**
 * 接口服务层

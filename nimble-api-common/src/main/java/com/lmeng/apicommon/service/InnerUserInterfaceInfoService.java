@@ -1,8 +1,6 @@
 package com.lmeng.apicommon.service;
 
 
-import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
-
 public interface InnerUserInterfaceInfoService  {
 
     /**

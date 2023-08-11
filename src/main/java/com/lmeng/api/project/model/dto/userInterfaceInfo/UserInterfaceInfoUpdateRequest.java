@@ -1,4 +1,4 @@
-package com.lmeng.apicommon.model.dto.userInterfaceInfo;
+package com.lmeng.api.project.model.dto.userInterfaceInfo;
 
 import lombok.Data;
 

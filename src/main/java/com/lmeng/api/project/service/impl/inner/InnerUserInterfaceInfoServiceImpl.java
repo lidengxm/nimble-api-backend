@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.service.UserInterfaceInfoService;
 import com.lmeng.apicommon.common.ErrorCode;
-import com.lmeng.apicommon.common.ResultUtils;
-import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
+import com.lmeng.apicommon.entity.UserInterfaceInfo;
 import com.lmeng.apicommon.service.InnerUserInterfaceInfoService;
 import org.apache.dubbo.config.annotation.DubboService;
 

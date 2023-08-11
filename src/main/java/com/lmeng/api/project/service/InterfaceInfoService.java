@@ -2,10 +2,7 @@ package com.lmeng.api.project.service;
 
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.lmeng.apicommon.model.entity.InterfaceInfo;
-import com.lmeng.nimbleclientsdk.client.NimbleApiClient;
-
-import javax.servlet.http.HttpServletRequest;
+import com.lmeng.apicommon.entity.InterfaceInfo;
 
 /**
  * @version 1.0
@@ -21,9 +18,4 @@ public interface InterfaceInfoService extends IService<InterfaceInfo> {
      */
     void validInterfaceInfo(InterfaceInfo InterfaceInfo, boolean add);
 
-    /**
-     * 获取api客户端
-     * @return
-     */
-    NimbleApiClient getNimbleApiClient(HttpServletRequest request);
 }

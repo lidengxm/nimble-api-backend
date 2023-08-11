@@ -2,17 +2,15 @@ package com.lmeng.api.project.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.lmeng.api.project.annotation.AuthCheck;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.mapper.UserInterfaceInfoMapper;
 import com.lmeng.api.project.service.InterfaceInfoService;
 import com.lmeng.apicommon.common.BaseResponse;
 import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.common.ResultUtils;
-import com.lmeng.apicommon.constant.UserConstant;
-import com.lmeng.apicommon.model.entity.InterfaceInfo;
-import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
-import com.lmeng.apicommon.model.vo.InterfaceInfoVO;
+import com.lmeng.apicommon.entity.InterfaceInfo;
+import com.lmeng.apicommon.entity.UserInterfaceInfo;
+import com.lmeng.api.project.model.vo.InterfaceInfoVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,10 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +43,6 @@ public class AnalysisController {
      * @return
      */
     @GetMapping("/top/interface/invoke")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<List<InterfaceInfoVO>> listTopInvokeInterface() {
         //1.查询出接口调用次数id集合
         List<UserInterfaceInfo> userInterfaceInfos = userInterfaceInfoMapper.listTopInvokeInterfaceInfo();

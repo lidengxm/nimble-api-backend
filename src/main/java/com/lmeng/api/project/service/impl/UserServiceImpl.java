@@ -17,12 +17,13 @@ import javax.servlet.http.HttpServletRequest;
 import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.constant.CommonConstant;
 import com.lmeng.apicommon.constant.UserConstant;
-import com.lmeng.apicommon.model.dto.user.UserQueryRequest;
-import com.lmeng.apicommon.model.entity.User;
-import com.lmeng.apicommon.model.enums.UserRoleEnum;
-import com.lmeng.apicommon.model.vo.LoginUserVO;
-import com.lmeng.apicommon.model.vo.UserVO;
+import com.lmeng.api.project.model.dto.user.UserQueryRequest;
+import com.lmeng.apicommon.entity.User;
+import com.lmeng.api.project.model.enums.UserRoleEnum;
+import com.lmeng.api.project.model.vo.LoginUserVO;
+import com.lmeng.api.project.model.vo.UserVO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -73,8 +74,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     .randomNumbers(8)).getBytes());
             // 4. 插入数据
             User user = new User();
+            long id = RandomUtils.nextLong(10000000000L, 99999999999L);
+            user.setId(id);
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
+            user.setUserName(CommonConstant.USER_PREINDEX + RandomUtil.randomString(4));
             user.setAccessKey(accessKey);
             user.setSecretKey(secretKey);
             user.setUserAvatar("https://alylmengbucket.oss-cn-nanjing.aliyuncs.com/pictures/202307091458670.webp");
@@ -108,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 用户不存在
         if (user == null) {
             log.info("user login failed, userAccount cannot match userPassword");
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误!");
         }
         // 3. 记录用户的登录态
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);

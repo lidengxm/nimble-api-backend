@@ -7,17 +7,11 @@ import com.lmeng.api.project.mapper.InterfaceInfoMapper;
 import com.lmeng.api.project.service.InterfaceInfoService;
 import com.lmeng.api.project.service.UserService;
 import com.lmeng.apicommon.common.ErrorCode;
-import com.lmeng.apicommon.model.entity.InterfaceInfo;
-import com.lmeng.apicommon.model.entity.User;
-import com.lmeng.nimbleclientsdk.client.NimbleApiClient;
+import com.lmeng.apicommon.entity.InterfaceInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
-import static cn.hutool.poi.excel.sax.AttributeName.s;
-import static cn.hutool.poi.excel.sax.AttributeName.t;
 
 /**
 * 接口服务实现层
@@ -52,15 +46,15 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     }
 
 
-    @Override
-    public NimbleApiClient getNimbleApiClient(HttpServletRequest request) {
-        //1.获取登录用户
-        User loginUser = userService.getLoginUser(request);
-        String accessKey = loginUser.getAccessKey();
-        String secretKey = loginUser.getSecretKey();
-        //2.返回api客户端
-        return new NimbleApiClient(accessKey,secretKey);
-    }
+//    @Override
+//    public NimbleApiClient getNimbleApiClient(HttpServletRequest request) {
+//        //1.获取登录用户
+//        User loginUser = userService.getLoginUser(request);
+//        String accessKey = loginUser.getAccessKey();
+//        String secretKey = loginUser.getSecretKey();
+//        //2.返回api客户端
+//        return new NimbleApiClient(accessKey,secretKey);
+//    }
 }
 
 

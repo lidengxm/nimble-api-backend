@@ -1,4 +1,4 @@
-package com.lmeng.apicommon.model.dto.user;
+package com.lmeng.api.project.model.dto.user;
 
 import com.lmeng.apicommon.common.PageRequest;
 import lombok.Data;

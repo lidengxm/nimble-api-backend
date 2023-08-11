@@ -2,8 +2,8 @@ package com.lemng.apigateway.filter;
 
 import com.lemng.apigateway.exception.BusinessException;
 import com.lmeng.apicommon.common.ErrorCode;
-import com.lmeng.apicommon.model.entity.InterfaceInfo;
-import com.lmeng.apicommon.model.entity.User;
+import com.lmeng.apicommon.entity.InterfaceInfo;
+import com.lmeng.apicommon.entity.User;
 import com.lmeng.apicommon.service.InnerInterfaceInfoService;
 import com.lmeng.apicommon.service.InnerUserInterfaceInfoService;
 import com.lmeng.apicommon.service.InnerUserService;
@@ -86,12 +86,10 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String timestamp = headers.getFirst("timestamp");
         String sign = headers.getFirst("sign");
         String body = headers.getFirst("body");
-//        String body = URLUtil.decode(headers.getFirst("body"), CharsetUtil.CHARSET_UTF_8);
 
         if(StringUtils.isEmpty(nonce)
                 || StringUtils.isEmpty(timestamp)
                 || StringUtils.isEmpty(sign)) {
-//                || StringUtils.isEmpty(body)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求头参数不完整!");
         }
 
@@ -120,7 +118,6 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
         //从数据库中查询secretKey并判断是否和用户传的加密的sk相等
         String secretKey = user.getSecretKey();
-//        String serverSign = SignUtil.getSign(body, secretKey);
         String serverSign = SignUtils.generateSign(body, secretKey);
         if(sign == null || !sign.equals(serverSign)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"签名错误!");

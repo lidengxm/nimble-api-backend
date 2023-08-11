@@ -1,4 +1,4 @@
-package com.lmeng.apicommon.model.dto.interfaceInfo;
+package com.lmeng.api.project.model.dto.interfaceInfo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;

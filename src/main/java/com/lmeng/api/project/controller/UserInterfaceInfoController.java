@@ -3,7 +3,6 @@ package com.lmeng.api.project.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
-import com.lmeng.api.project.annotation.AuthCheck;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
 import com.lmeng.api.project.service.UserInterfaceInfoService;
@@ -13,12 +12,12 @@ import com.lmeng.apicommon.common.DeleteRequest;
 import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.common.ResultUtils;
 import com.lmeng.apicommon.constant.CommonConstant;
-import com.lmeng.apicommon.constant.UserConstant;
-import com.lmeng.apicommon.model.dto.userInterfaceInfo.UserInterfaceInfoAddRequest;
-import com.lmeng.apicommon.model.dto.userInterfaceInfo.UserInterfaceInfoQueryRequest;
-import com.lmeng.apicommon.model.dto.userInterfaceInfo.UserInterfaceInfoUpdateRequest;
-import com.lmeng.apicommon.model.entity.User;
-import com.lmeng.apicommon.model.entity.UserInterfaceInfo;
+import com.lmeng.api.project.model.dto.userInterfaceInfo.UserInterfaceInfoAddRequest;
+import com.lmeng.api.project.model.dto.userInterfaceInfo.UserInterfaceInfoInvokeRequest;
+import com.lmeng.api.project.model.dto.userInterfaceInfo.UserInterfaceInfoQueryRequest;
+import com.lmeng.api.project.model.dto.userInterfaceInfo.UserInterfaceInfoUpdateRequest;
+import com.lmeng.apicommon.entity.User;
+import com.lmeng.apicommon.entity.UserInterfaceInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -51,7 +50,6 @@ public class UserInterfaceInfoController {
      * @return
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addUserInterfaceInfo(@RequestBody UserInterfaceInfoAddRequest userInterfaceInfoAddRequest, HttpServletRequest request) {
         if (userInterfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -81,7 +79,6 @@ public class UserInterfaceInfoController {
      * @return
      */
     @PostMapping("/delete")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> deleteUserInterfaceInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -107,7 +104,6 @@ public class UserInterfaceInfoController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUserInterfaceInfo(@RequestBody UserInterfaceInfoUpdateRequest UserInterfaceInfoUpdateRequest) {
         if (UserInterfaceInfoUpdateRequest == null || UserInterfaceInfoUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -149,7 +145,6 @@ public class UserInterfaceInfoController {
      * @return
      */
     @GetMapping("/list/page")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Page<UserInterfaceInfo>> listUserInterfaceInfoByPage(UserInterfaceInfoQueryRequest UserInterfaceInfoQueryRequest, HttpServletRequest request) {
         if (UserInterfaceInfoQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -172,6 +167,36 @@ public class UserInterfaceInfoController {
         return ResultUtils.success(UserInterfaceInfoPage);
     }
 
+    /**
+     * 获取免费接口调用次数
+     * @param invokeRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/get/free")
+    public BaseResponse<Boolean> getFreeInvokeInterfaceCount(@RequestBody UserInterfaceInfoInvokeRequest invokeRequest, HttpServletRequest request) {
+        //1.校验请求参数
+        if(invokeRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long interfaceInfoId = invokeRequest.getInterfaceInfoId();
+        Long userId = invokeRequest.getUserId();
+        if(interfaceInfoId == null || userId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不完整!");
+        }
+
+        //2.给用户分配调用次数
+        //加互斥锁，防止用户刷次数
+        synchronized (userId) {
+            User loginUser = userService.getLoginUser(request);
+            if(!userId.equals(loginUser.getId())) {
+                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+            }
+            //更新用户接口信息
+            boolean result = UserInterfaceInfoService.updateUserInterfaceInfo(invokeRequest);
+            return ResultUtils.success(result);
+        }
+    }
 
 
 
