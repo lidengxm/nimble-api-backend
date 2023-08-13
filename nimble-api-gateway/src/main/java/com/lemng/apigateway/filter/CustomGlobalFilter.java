@@ -2,6 +2,7 @@ package com.lemng.apigateway.filter;
 
 import com.lemng.apigateway.exception.BusinessException;
 import com.lmeng.apicommon.common.ErrorCode;
+import com.lmeng.apicommon.constant.CommonConstant;
 import com.lmeng.apicommon.entity.InterfaceInfo;
 import com.lmeng.apicommon.entity.User;
 import com.lmeng.apicommon.service.InnerInterfaceInfoService;
@@ -18,6 +19,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -28,10 +30,12 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @version 1.0
@@ -56,6 +60,9 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     @DubboReference
     private InnerUserInterfaceInfoService innerUserInterfaceInfoService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -121,6 +128,14 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         String serverSign = SignUtils.generateSign(body, secretKey);
         if(sign == null || !sign.equals(serverSign)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"签名错误!");
+        }
+
+        //防重放，用户可能会恶意请求重放来重新发送请求
+        //Redis存储随机数并设置过期时间，如果已存在就存入不了，并返回null
+        String key = nonce + CommonConstant.NONCE_KEY_PREINDEX;
+        Boolean ifSuccess = stringRedisTemplate.opsForValue().setIfAbsent(key, "1", 5, TimeUnit.MINUTES);
+        if(ifSuccess == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"禁止请求重放!");
         }
 
         //5.请求的模拟接口是否存在（从数据库中查询模拟接口是否存在以及请求方法是否匹配）

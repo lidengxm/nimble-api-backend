@@ -44,7 +44,7 @@ aliyun:
     bucketName: alylmengbucket
     fileHost: cache
 
-# 这段配置仅供测试，实际应该根据登录用户获取对应的 ak、sk，仅供测试用
+# 这段配置仅供测试，实际应该根据登录用户获取对应的 ak、sk，仅供测试使用
 yuapi:
   client:
     access-key: yupiapi
@@ -59,8 +59,3 @@ dubbo:
     port: -1
   registry:
     address: nacos://localhost:8848
-
-# 网关接口配置
-nimble:
-  gateway:
-    host: http://localhost:8103

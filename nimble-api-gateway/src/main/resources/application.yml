@@ -10,20 +10,11 @@ spring:
               - Path=/api/**
         default-filters:
           - AddRequestHeader=source, yupi
-
-#    gateway:
-#      routes:
-#        - id: api_backend_route
-#          uri: lb://api-backend
-#          predicates:
-#            - Path=/api/**
-
-
-#        - id: after_route
-#          uri: https://baidu.com
-#          predicates:
-#            - Before=2023-07-11T17:42:47.789-07:00[America/Denver]
-
+  # redis 配置
+  redis:
+    port: 6379
+    host: localhost
+    database: 0
 # 详细日志
 logging:
   level:

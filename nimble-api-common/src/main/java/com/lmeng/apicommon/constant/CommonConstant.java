@@ -25,4 +25,9 @@ public interface CommonConstant {
      */
     String USER_PREINDEX = "API";
 
+    /**
+     * 防止请求重放key前缀
+     */
+    String NONCE_KEY_PREINDEX = "nonce:";
+
 }
