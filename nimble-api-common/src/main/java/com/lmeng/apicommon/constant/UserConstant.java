@@ -8,9 +8,12 @@ public interface UserConstant {
     /**
      * 用户登录态键
      */
-    String USER_LOGIN_STATE = "user_login";
+    String LOGIN_USER_STATE = "user:login";
 
-    //  region 权限
+    /**
+     * 登录态过期时间
+     */
+    Long LOGIN_USER_TTL = 30L;
 
     /**
      * 默认角色
@@ -27,5 +30,4 @@ public interface UserConstant {
      */
     String BAN_ROLE = "ban";
 
-    // endregion
 }

@@ -50,7 +50,9 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<String> IP_WHITE_LIST = Collections.singletonList("127.0.0.1");
 
-    private static final String INTERFACE_HOST = "http://localhost:8103";
+//    private static final String INTERFACE_HOST = "http://localhost:8103";
+    //上线配置
+    private static final String INTERFACE_HOST = "http://124.220.222.98:8103";
 
     @DubboReference
     private InnerUserService innerUserService;

@@ -4,15 +4,21 @@ import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
 import com.lmeng.api.project.mapper.UserMapper;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.service.UserService;
+import com.lmeng.api.project.utils.JwtUtils;
 import com.lmeng.api.project.utils.SqlUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.lmeng.apicommon.common.ErrorCode;
 import com.lmeng.apicommon.constant.CommonConstant;
@@ -26,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -40,6 +47,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     private static final String SALT = "nimble-api";
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private Gson gson;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -91,7 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request, HttpServletResponse response) {
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -115,44 +128,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误!");
         }
         // 3. 记录用户的登录态
-        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
+        return setLoginUser(response, user);
+//        LoginUserVO loginUserVO = getLoginUserVO(user);
+//        request.getSession().setAttribute(UserConstant.LOGIN_USER_STATE,user);
+//        log.info(String.valueOf(request.getSession()));
+//        return loginUserVO;
+    }
+
+    /**
+     * 记录用户的登录态，并返回脱敏后的登录用户
+     * @param response
+     * @param user
+     * @return
+     */
+    private LoginUserVO setLoginUser(HttpServletResponse response, User user) {
+        String token = JwtUtils.getJwtToken(user.getId(), user.getUserName());
+        Cookie cookie = new Cookie("token", token);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        String userJson = gson.toJson(user);
+        stringRedisTemplate.opsForValue().set(UserConstant.LOGIN_USER_STATE + user.getId(),
+                userJson, JwtUtils.EXPIRE, TimeUnit.MILLISECONDS);
         return this.getLoginUserVO(user);
     }
 
 
     /**
      * 获取当前登录用户
-     *
      * @param request
      * @return
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
         // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        User currentUser = (User) userObj;
-        if (currentUser == null || currentUser.getId() == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        Long userId = JwtUtils.getUserIdByToken(request);
+        if (userId == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录");
         }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        String userJson = stringRedisTemplate.opsForValue().get(UserConstant.LOGIN_USER_STATE + userId);
+        User user = gson.fromJson(userJson, User.class);
+        if (user == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户不存在");
         }
-        return currentUser;
+        return user;
+
+//        // 先判断是否已登录
+//        Object userObj = request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE);
+//        log.info("获取登录用户= " + userObj);
+//        User currentUser = (User) userObj;
+//        log.info("currentuser=" + currentUser);
+//        if (currentUser == null || currentUser.getId() == null) {
+//            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录");
+//        }
+//        // 从数据库查询
+//        long userId = currentUser.getId();
+//        currentUser = this.getById(userId);
+//        if (currentUser == null) {
+//            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户不存在");
+//        }
+//        return currentUser;
     }
 
     /**
      * 获取当前登录用户（允许未登录）
-     *
      * @param request
      * @return
      */
     @Override
     public User getLoginUserPermitNull(HttpServletRequest request) {
         // 先判断是否已登录
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        Object userObj = request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getId() == null) {
             return null;
@@ -171,7 +216,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean isAdmin(HttpServletRequest request) {
         // 仅管理员可查询
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
+        Object userObj = request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE);
         User user = (User) userObj;
         return isAdmin(user);
     }
@@ -187,13 +232,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @param request
      */
     @Override
-    public boolean userLogout(HttpServletRequest request) {
-        if (request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE) == null) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+    public boolean userLogout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("token")){
+                Long userId = JwtUtils.getUserIdByToken(request);
+                stringRedisTemplate.delete(UserConstant.LOGIN_USER_STATE + userId);
+                Cookie timeOutCookie = new Cookie(cookie.getName(),cookie.getValue());
+                timeOutCookie.setMaxAge(0);
+                response.addCookie(timeOutCookie);
+                return true;
+            }
         }
-        // 移除登录态
-        request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
-        return true;
+
+        throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+
+//        if (request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE) == null) {
+//            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户未登录!");
+//        }
+//        // 移除登录态
+//        request.getSession().removeAttribute(UserConstant.LOGIN_USER_STATE);
+//        return true;
     }
 
     @Override

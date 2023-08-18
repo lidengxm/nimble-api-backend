@@ -14,7 +14,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Configuration
 @MapperScan("com.lmeng.api.project.mapper")
-@PropertySource("classpath:des.properties")
+//@PropertySource("classpath:des.properties")
 public class MyBatisPlusConfig {
 
     /**

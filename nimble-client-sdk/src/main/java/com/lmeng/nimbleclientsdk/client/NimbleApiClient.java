@@ -16,7 +16,9 @@ import java.util.Map;
 
 public class NimbleApiClient {
 
-    protected static final String GATEWAY_HOST = "http://localhost:8103";
+//    protected static final String GATEWAY_HOST = "http://localhost:8103";
+    //上线配置
+    protected static final String GATEWAY_HOST = "http://124.220.222.98:8103";
 
     protected String accessKey;
 
