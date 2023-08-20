@@ -36,6 +36,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import static com.lmeng.apicommon.common.ErrorCode.SYSTEM_ERROR;
+
 /**
  * 用户服务实现层
  */
@@ -97,7 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setUserAvatar("https://alylmengbucket.oss-cn-nanjing.aliyuncs.com/pictures/202307091458670.webp");
             boolean saveResult = this.save(user);
             if (!saveResult) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+                throw new BusinessException(SYSTEM_ERROR, "注册失败，数据库错误");
             }
             return user.getId();
         }
@@ -128,11 +130,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误!");
         }
         // 3. 记录用户的登录态
-        return setLoginUser(response, user);
-//        LoginUserVO loginUserVO = getLoginUserVO(user);
-//        request.getSession().setAttribute(UserConstant.LOGIN_USER_STATE,user);
-//        log.info(String.valueOf(request.getSession()));
-//        return loginUserVO;
+//        return setLoginUser(response, user);
+        LoginUserVO loginUserVO = getLoginUserVO(user);
+        request.getSession().setAttribute(UserConstant.LOGIN_USER_STATE,user);
+        log.info(String.valueOf(request.getSession()));
+        return loginUserVO;
     }
 
     /**
@@ -161,32 +163,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public User getLoginUser(HttpServletRequest request) {
         // 先判断是否已登录
-        Long userId = JwtUtils.getUserIdByToken(request);
-        if (userId == null){
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录");
-        }
-        String userJson = stringRedisTemplate.opsForValue().get(UserConstant.LOGIN_USER_STATE + userId);
-        User user = gson.fromJson(userJson, User.class);
-        if (user == null){
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户不存在");
-        }
-        return user;
-
-//        // 先判断是否已登录
-//        Object userObj = request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE);
-//        log.info("获取登录用户= " + userObj);
-//        User currentUser = (User) userObj;
-//        log.info("currentuser=" + currentUser);
-//        if (currentUser == null || currentUser.getId() == null) {
+//        Long userId = JwtUtils.getUserIdByToken(request);
+//        if (userId == null){
 //            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录");
 //        }
-//        // 从数据库查询
-//        long userId = currentUser.getId();
-//        currentUser = this.getById(userId);
-//        if (currentUser == null) {
+//        String userJson = stringRedisTemplate.opsForValue().get(UserConstant.LOGIN_USER_STATE + userId);
+//        User user = gson.fromJson(userJson, User.class);
+//        if (user == null){
 //            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户不存在");
 //        }
-//        return currentUser;
+//        return user;
+
+        // 先判断是否已登录
+        Object userObj = request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE);
+        log.info("获取登录用户= " + userObj);
+        User currentUser = (User) userObj;
+        log.info("currentuser=" + currentUser);
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户未登录");
+        }
+        // 从数据库查询
+        long userId = currentUser.getId();
+        currentUser = this.getById(userId);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"用户不存在");
+        }
+        return currentUser;
     }
 
     /**
@@ -233,26 +235,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public boolean userLogout(HttpServletRequest request, HttpServletResponse response) {
-        Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")){
-                Long userId = JwtUtils.getUserIdByToken(request);
-                stringRedisTemplate.delete(UserConstant.LOGIN_USER_STATE + userId);
-                Cookie timeOutCookie = new Cookie(cookie.getName(),cookie.getValue());
-                timeOutCookie.setMaxAge(0);
-                response.addCookie(timeOutCookie);
-                return true;
-            }
-        }
-
-        throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
-
-//        if (request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE) == null) {
-//            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户未登录!");
+//        Cookie[] cookies = request.getCookies();
+//        for (Cookie cookie : cookies) {
+//            if (cookie.getName().equals("token")){
+//                Long userId = JwtUtils.getUserIdByToken(request);
+//                stringRedisTemplate.delete(UserConstant.LOGIN_USER_STATE + userId);
+//                Cookie timeOutCookie = new Cookie(cookie.getName(),cookie.getValue());
+//                timeOutCookie.setMaxAge(0);
+//                response.addCookie(timeOutCookie);
+//                return true;
+//            }
 //        }
-//        // 移除登录态
-//        request.getSession().removeAttribute(UserConstant.LOGIN_USER_STATE);
-//        return true;
+//
+//        throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+
+        if (request.getSession().getAttribute(UserConstant.LOGIN_USER_STATE) == null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户未登录!");
+        }
+        // 移除登录态
+        request.getSession().removeAttribute(UserConstant.LOGIN_USER_STATE);
+        return true;
     }
 
     @Override

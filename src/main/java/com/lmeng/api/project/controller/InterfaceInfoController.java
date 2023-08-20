@@ -352,6 +352,7 @@ public class InterfaceInfoController {
             return null;
         } catch (Exception e) {
             e.printStackTrace();
+            log.info("调用方法出错，错误：" + e.toString());
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "调用方法出错！");
         }
     }
