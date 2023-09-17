@@ -25,15 +25,7 @@ spring:
     port: 6379
     timeout: 5000
     password: 123321
-# 阿里云OSS配置
-aliyun:
-  oss:
-    endpoint: oss-cn-nanjing.aliyuncs.com
-    urlPrefix: http://nimble-api-project.oss-cn-hangzhou.aliyuncs.com
-    accessKeyId: LTAI5tCdp4h6wavsYpTi4AUs
-    accessKeySecret: oVBQBQEFCDzs1g1H9zhYc1ja10FrwE
-    bucketName: alylmengbucket
-    fileHost: cache
+
 
 # Dubbo配置和Nacos
 dubbo:
