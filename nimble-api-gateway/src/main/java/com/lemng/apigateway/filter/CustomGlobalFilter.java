@@ -49,10 +49,10 @@ import java.util.concurrent.TimeUnit;
 public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
     private static final List<String> IP_WHITE_LIST = Collections.singletonList("127.0.0.1");
+//    private static final List<String> IP_WHITE_LIST = Collections.singletonList("124.220.222.98");
 
-//    private static final String INTERFACE_HOST = "http://localhost:8103";
-    //上线配置
-    private static final String INTERFACE_HOST = "http://124.220.222.98:8103";
+    private static final String INTERFACE_HOST = "http://localhost:8103";
+//    private static final String INTERFACE_HOST = "http://124.220.222.98:8103";
 
     @DubboReference
     private InnerUserService innerUserService;
@@ -83,10 +83,10 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
 
         //2.访问控制（白名单标识允许访问的IP）
         ServerHttpResponse response = exchange.getResponse();
-//        if(!IP_WHITE_LIST.contains(sourceAddress)) {
-//            response.setStatusCode(HttpStatus.FORBIDDEN);
-//            return response.setComplete();
-//        }
+        if(!IP_WHITE_LIST.contains(sourceAddress)) {
+            response.setStatusCode(HttpStatus.FORBIDDEN);
+            return response.setComplete();
+        }
 
         //3.用户鉴权，判断ak，nonce，timestamp是否合法
         HttpHeaders headers = request.getHeaders();

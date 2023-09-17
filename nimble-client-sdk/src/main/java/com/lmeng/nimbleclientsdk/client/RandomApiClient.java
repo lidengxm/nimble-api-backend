@@ -2,6 +2,7 @@ package com.lmeng.nimbleclientsdk.client;
 
 import cn.hutool.http.HttpRequest;
 
+
 /**
  * RandomController-RandomApiClient
  */
@@ -15,7 +16,7 @@ public class RandomApiClient extends NimbleApiClient{
      * 获取随机文本
      * @return
      */
-    public String getRandomWork(){
+    public String getRandomWork()  {
         return HttpRequest.get(GATEWAY_HOST+"/api/interface/random/word")
                 .addHeaders(getHeadMap("",accessKey,secretKey))
                 .execute().body();
@@ -25,7 +26,7 @@ public class RandomApiClient extends NimbleApiClient{
      * 获取随机动漫图片
      * @return
      */
-    public String getRandomImageUrl(){
+    public String getRandomImageUrl()  {
         return HttpRequest.post(GATEWAY_HOST+"/api/interface/random/image")
                 .addHeaders(getHeadMap("",accessKey,secretKey))
                 .execute().body();

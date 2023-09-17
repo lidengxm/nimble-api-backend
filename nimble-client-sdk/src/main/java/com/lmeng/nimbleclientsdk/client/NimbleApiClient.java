@@ -1,9 +1,12 @@
 package com.lmeng.nimbleclientsdk.client;
 
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.URLUtil;
 import com.lmeng.nimbleclientsdk.util.SignUtils;
 
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,9 +19,9 @@ import java.util.Map;
 
 public class NimbleApiClient {
 
-//    protected static final String GATEWAY_HOST = "http://localhost:8103";
+    protected static final String GATEWAY_HOST = "http://localhost:8103";
     //上线配置
-    protected static final String GATEWAY_HOST = "http://124.220.222.98:8103";
+//    protected static final String GATEWAY_HOST = "http://124.220.222.98:8103";
 
     protected String accessKey;
 
@@ -36,7 +39,7 @@ public class NimbleApiClient {
      * @param secretKey
      * @return
      */
-    protected static Map<String,String> getHeadMap(String body, String accessKey, String secretKey){
+    protected static Map<String,String> getHeadMap(String body, String accessKey, String secretKey) {
         Map<String,String> headMap = new HashMap<>();
         headMap.put("accessKey",accessKey);
         headMap.put("body",body);

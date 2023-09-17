@@ -4,6 +4,7 @@ import com.alibaba.nacos.api.naming.pojo.healthcheck.impl.Http;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
+import com.lmeng.api.project.annotation.AuthCheck;
 import com.lmeng.api.project.exception.BusinessException;
 import com.lmeng.api.project.exception.ThrowUtils;
 import com.lmeng.api.project.model.vo.InterfaceInfoVO;
@@ -200,6 +201,7 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/online")
+    @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> onlineInterfaceInfoById(@RequestBody IdRequest idRequest, HttpServletRequest request) {
         //1.判断接口是否存在
         if(idRequest == null || idRequest.getId() <= 0) {
@@ -239,6 +241,7 @@ public class InterfaceInfoController {
      * @return
      */
     @PostMapping("/offline")
+    @AuthCheck(mustRole = "admin")
     public BaseResponse<Boolean> offlineInterfaceInfoById(@RequestBody IdRequest idRequest,HttpServletRequest request) {
         //1.判断接口是否存在
         if(idRequest == null || idRequest.getId() <= 0) {

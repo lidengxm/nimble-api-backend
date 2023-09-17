@@ -1,8 +1,6 @@
 package com.lmeng.nimbleclientsdk.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @version 1.0
@@ -12,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 //@NoArgsConstructor
 //@AllArgsConstructor
-public class User {
+public class Text {
 
-    String name;
+    String text;
 }
