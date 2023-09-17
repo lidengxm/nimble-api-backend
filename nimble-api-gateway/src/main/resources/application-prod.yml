@@ -1,0 +1,34 @@
+server:
+  port: 8103
+spring:
+  cloud:
+      gateway:
+        routes:
+          - id: path_route
+            uri: http://124.220.222.98:8102
+            predicates:
+              - Path=/api/**
+        default-filters:
+          - AddRequestHeader=source, yupi
+  # redis 配置
+  redis:
+    port: 6379
+    host: 124.220.222.98
+    database: 0
+    password: 123321
+# 详细日志
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+# Dubbo配置和Nacos
+dubbo:
+  application:
+    name: nimble-api-backend
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: nacos://124.220.222.98:8848

@@ -1,29 +1,46 @@
 # 线上配置文件
 server:
+  address: 0.0.0.0
   port: 8101
+  servlet:
+    context-path: /api
 spring:
   # 数据库配置
-  # todo 需替换配置
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/my_db
+    url: jdbc:mysql://124.220.222.98:3306/api?useUnicode=true&characterEncoding=UTF-8&useSSL=false
     username: root
-    password: 123456
+    password: txy
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  # session 失效时间（分钟），开启分布式必须要有
+  session:
+    timeout: 43200
+    store-type: redis
   # Redis 配置
-  # todo 需替换配置
   redis:
-    database: 1
-    host: localhost
+#    database: 1
+    host: 124.220.222.98
     port: 6379
     timeout: 5000
-    password: 123456
-  # Elasticsearch 配置
-  # todo 需替换配置
-  elasticsearch:
-    uris: http://localhost:9200
-    username: root
-    password: 123456
-mybatis-plus:
-  configuration:
-    # 生产环境关闭日志
-    log-impl: ''
+    password: 123321
+# 阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: oss-cn-nanjing.aliyuncs.com
+    urlPrefix: http://nimble-api-project.oss-cn-hangzhou.aliyuncs.com
+    accessKeyId: LTAI5tCdp4h6wavsYpTi4AUs
+    accessKeySecret: oVBQBQEFCDzs1g1H9zhYc1ja10FrwE
+    bucketName: alylmengbucket
+    fileHost: cache
+
+# Dubbo配置和Nacos
+dubbo:
+  application:
+    name: nimble-api-backend
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    address: nacos://124.220.222.98:8848
