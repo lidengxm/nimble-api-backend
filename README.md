@@ -15,7 +15,7 @@
 * 后台管理员可以对接口进行管理、分析
 * 前台用户可以浏览接口、调用接口、查看个人信息，调用接口需要经过网关过滤才能调用到自己开发的SDK，真实的接口用户根本了解不到，一定程序上增强了接口调用的安全性，并且网关层过滤器使用Sentinel进行限流，每秒钟网关的请求是有限的。
 
-![](https://alylmengbucket.oss-cn-nanjing.aliyuncs.com/pictures/202307281435750.png)
+![API项目架构 (1)](https://alylmengbucket.oss-cn-nanjing.aliyuncs.com/2023-9/202309201816971.png)
 
 
 
